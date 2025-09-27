@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Ticket Management System</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script src="https://unpkg.com/@zxing/library@latest/umd/index.min.js"></script>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="login-screen" class="screen active">
+        <div class="login-container">
+            <div class="card login-card">
+                <div class="card__body">
+                    <h1>Admin Login</h1>
+                    <p class="mb-8">Access the QR Ticket Management System</p>
+                    <form id="login-form">
+                        <div class="form-group">
+                            <label class="form-label" for="email">Email</label>
+                            <input type="email" id="email" class="form-control" required value="admin@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="password">Password</label>
+                            <input type="password" id="password" class="form-control" required value="admin123">
+                        </div>
+                        <button type="submit" class="btn btn--primary btn--full-width">Login</button>
+                    </form>
+                    <div id="login-error" class="status status--error hidden mt-8"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="main-app" class="screen hidden">
+        <!-- Navigation -->
+        <nav class="nav-bar">
+            <div class="container flex justify-between items-center">
+                <h2>QR Ticket System</h2>
+                <div class="nav-actions flex gap-16 items-center">
+                    <span id="admin-name" class="nav-admin">Admin</span>
+                    <button id="logout-btn" class="btn btn--secondary btn--sm">Logout</button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Tab Navigation -->
+        <div class="tab-navigation">
+            <div class="container">
+                <div class="tab-buttons flex gap-4">
+                    <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
+                    <button class="tab-btn" data-tab="upload">Upload CSV</button>
+                    <button class="tab-btn" data-tab="scanner">QR Scanner</button>
+                    <button class="tab-btn" data-tab="email">Email</button>
+                    <button class="tab-btn" data-tab="tickets">Tickets</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="container py-16">
+            <!-- Dashboard Tab -->
+            <div id="dashboard-tab" class="tab-content active">
+                <h3>Dashboard</h3>
+                <div class="stats-grid">
+                    <div class="card stat-card">
+                        <div class="card__body">
+                            <h4>Total Tickets</h4>
+                            <div class="stat-number" id="total-tickets">0</div>
+                        </div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="card__body">
+                            <h4>Used Tickets</h4>
+                            <div class="stat-number used" id="used-tickets">0</div>
+                        </div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="card__body">
+                            <h4>Unused Tickets</h4>
+                            <div class="stat-number unused" id="unused-tickets">0</div>
+                        </div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="card__body">
+                            <h4>Attendance Rate</h4>
+                            <div class="stat-number" id="attendance-rate">0%</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-24">
+                    <h4>Recent Activity</h4>
+                    <div class="card">
+                        <div class="card__body">
+                            <div id="recent-activity">No recent activity</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CSV Upload Tab -->
+            <div id="upload-tab" class="tab-content hidden">
+                <h3>Upload CSV File</h3>
+                <div class="upload-section">
+                    <div class="card">
+                        <div class="card__body">
+                            <div class="form-group">
+                                <label class="form-label">CSV File (ticket_id, name, gender, roll_number, mobile, email)</label>
+                                <input type="file" id="csv-file" class="form-control" accept=".csv">
+                            </div>
+                            <button id="upload-btn" class="btn btn--primary" disabled>Upload & Generate QR Codes</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="csv-preview" class="hidden">
+                    <h4>CSV Preview</h4>
+                    <div class="card">
+                        <div class="card__body">
+                            <div id="preview-table"></div>
+                        </div>
+                    </div>
+                </div>
+                <div id="qr-generation" class="hidden">
+                    <h4>Generated QR Codes</h4>
+                    <div class="qr-grid" id="qr-codes-grid"></div>
+                </div>
+            </div>
+
+            <!-- QR Scanner Tab -->
+            <div id="scanner-tab" class="tab-content hidden">
+                <h3>QR Code Scanner</h3>
+                <div class="scanner-section">
+                    <div class="card">
+                        <div class="card__body">
+                            <div class="scanner-controls flex gap-16 mb-16">
+                                <button id="start-scanner" class="btn btn--primary">Start Scanner</button>
+                                <button id="stop-scanner" class="btn btn--secondary" disabled>Stop Scanner</button>
+                            </div>
+                            <div id="scanner-container" class="scanner-container hidden">
+                                <video id="scanner-video" class="scanner-video" autoplay muted playsinline></video>
+                                <div class="scanner-overlay"></div>
+                            </div>
+                            <div id="scan-result" class="scan-result hidden">
+                                <h5>Scan Result</h5>
+                                <div id="scan-data"></div>
+                                <div id="scan-status"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Email Tab -->
+            <div id="email-tab" class="tab-content hidden">
+                <h3>Email Distribution</h3>
+                <div class="email-section">
+                    <div class="card">
+                        <div class="card__body">
+                            <div class="form-group">
+                                <label class="form-label">Email Subject</label>
+                                <input type="text" id="email-subject" class="form-control" value="Your Event Ticket - QR Code Inside">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Email Message</label>
+                                <textarea id="email-message" class="form-control" rows="6">Dear {{name}},
+
+Please find your event ticket with QR code. Your ticket details:
+- Ticket ID: {{ticket_id}}
+- Name: {{name}}
+- Roll Number: {{roll_number}}
+
+Please show this QR code at the event entrance.
+
+Thank you!</textarea>
+                            </div>
+                            <div class="email-actions flex gap-16">
+                                <button id="send-all-emails" class="btn btn--primary">Send to All Unused Tickets</button>
+                                <button id="test-email" class="btn btn--secondary">Send Test Email</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="email-status" class="mt-16 hidden">
+                        <div class="card">
+                            <div class="card__body">
+                                <h5>Email Status</h5>
+                                <div id="email-progress"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tickets Management Tab -->
+            <div id="tickets-tab" class="tab-content hidden">
+                <h3>Ticket Management</h3>
+                <div class="ticket-controls flex gap-16 mb-16">
+                    <input type="search" id="ticket-search" class="form-control" placeholder="Search tickets..." style="max-width: 300px;">
+                    <select id="ticket-filter" class="form-control" style="max-width: 200px;">
+                        <option value="all">All Tickets</option>
+                        <option value="used">Used Only</option>
+                        <option value="unused">Unused Only</option>
+                    </select>
+                </div>
+                <div class="card">
+                    <div class="card__body">
+                        <div id="tickets-table"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- QR Modal -->
+    <div id="qr-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4>QR Code Details</h4>
+                <button id="close-modal" class="btn btn--secondary btn--sm">Close</button>
+            </div>
+            <div class="modal-body">
+                <div id="modal-qr-code"></div>
+                <div id="modal-ticket-details"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
