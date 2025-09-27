@@ -8,49 +8,9 @@ let appState = {
     recentActivity: []
 };
 
-// Sample data from the provided JSON
-const sampleTickets = [
-    {
-        "ticket_id": "TKT001",
-        "name": "Rahul Sharma",
-        "gender": "M",
-        "roll_number": "CS21001",
-        "mobile": "9876543210",
-        "email": "rahul.sharma@example.com",
-        "status": "unused",
-        "qr_code": "",
-        "scanned_at": null,
-        "scanned_by": null
-    },
-    {
-        "ticket_id": "TKT002", 
-        "name": "Priya Patel",
-        "gender": "F",
-        "roll_number": "EC21002",
-        "mobile": "9876543211",
-        "email": "priya.patel@example.com",
-        "status": "used",
-        "qr_code": "",
-        "scanned_at": "2025-09-27T10:30:00Z",
-        "scanned_by": "admin@example.com"
-    },
-    {
-        "ticket_id": "TKT003",
-        "name": "Arjun Singh",
-        "gender": "M", 
-        "roll_number": "ME21003",
-        "mobile": "9876543212",
-        "email": "arjun.singh@example.com",
-        "status": "unused",
-        "qr_code": "",
-        "scanned_at": null,
-        "scanned_by": null
-    }
-];
-
 const adminCredentials = {
-    "email": "admin@example.com",
-    "password": "admin123"
+    "email": "raasrangadmin@account.com",
+    "password": "raasrang@2025"
 };
 
 // Initialize Application
@@ -309,8 +269,8 @@ function handleLogout() {
     // Reset form values
     const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
-    if (emailInput) emailInput.value = 'admin@example.com';
-    if (passwordInput) passwordInput.value = 'admin123';
+    if (emailInput) emailInput.value = 'raasrangadmin@account.com';
+    if (passwordInput) passwordInput.value = 'raasrang@2025';
     
     console.log('Logout complete');
 }
